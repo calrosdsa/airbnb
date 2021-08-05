@@ -32,7 +32,7 @@ export default function Home({exploreData,cardData}) {
      </section>
      <section className="">
        <h2  className="text-xl px-10 py-10 font-bold">Live Aniwhere</h2>
-       <div className="justify-center px-5 overflow-x-auto scrollbar-hide flex ">
+       <div className="px-5 overflow-x-auto scrollbar-hide flex ">
        {cardData.map(({img,title})=>(
          <MediaCard
          img={img}
