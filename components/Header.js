@@ -1,53 +1,198 @@
-import React,{Fragment, useState} from 'react'
-import {Menu, Transition} from '@headlessui/react'
-import Image from "next/image"
-import {useRouter} from 'next/router'
-import {SearchIcon,GlobeAltIcon,MenuAlt1Icon, UserIcon,} from '@heroicons/react/solid'
+import Image from "next/image";
 
-function Header() {
-    const router=useRouter();
-    return (
-        <header className="sticky header  top-0 bg-white z-50 grid  grid-cols-3 shadow-lg py-1 sm:py-2 lg:py-3 2xl:py-5  px-3">
-            <div className="relative xl:mx-10  h-9 md:h-10 mt-1  cursor-pointer">
-                <Image
-                src="https://links.papareact.com/qd3"
-                layout='fill'
-                objectFit="contain"
-                objectPosition='left'
-                />
-            </div>
+import { useEffect, useState } from "react";
+import {
+  SearchIcon,
+  MenuIcon,
+  UserCircleIcon,
+  UsersIcon,
+  GlobeAltIcon,
+  UserIcon,
+} from "@heroicons/react/solid";
+import Fade from "react-reveal/Fade";
 
+import "react-date-range/dist/styles.css"; // main style file
+import "react-date-range/dist/theme/default.css"; // theme css file
+import { Calendar, DateRangePicker, DateRange } from "react-date-range";
+import { useRouter } from "next/dist/client/router";
 
-            <div className="flex  md:col-start-2 md:col-span-1 py-1  md:row-start-1 items-center  ">
-             <input autoFocus type="text col-span-3" className="hidden md:inline-flex md:h-9  focus:outline-none flex-grow bg-gray-200 rounded-lg  p-1"  placeholder="Start Search"/>
-             <Menu className="">
-                 {({open})=>(
-                     <Fragment>
-                     <Menu.Button>
-             <SearchIcon  className="h-8 ml-4 md:hidden bg-red-400 text-white justify-end inline-flex rounded-full p-2 cursor-pointer"/>
-                 </Menu.Button>
-                 <Transition show={open}
-                  enter="transition ease-out duration-500"
-                 
-                 >
-                     <Menu.Item className="absolute min-w-[300px] focus:outline-none  bg-gray-100 top-16 mt-2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full h-8">
-             <input autoFocus type="text col-span-3 " className="md:hidden rounded-full focus:outline-none  bg-gray-200 rounded-lg p-2 "  placeholder="Start Search"/>
-                     </Menu.Item>
-                 </Transition>
-                     </Fragment>
-             )}
-             </Menu>
+function Header({ placeholder }) {
+  const [searchInput, setSearchInput] = useState("");
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [noOfGuests, setNoOfGuests] = useState(1);
+
+  const router = useRouter();
+  const resetInput = () => {
+    setSearchInput("");
+  };
+
+  const search = () => {
+    router.push({
+      pathname: "/search",
+      query: {
+        location: searchInput,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        noOfGuests,
+      },
+    });
+  };
+
+  const selectionRange = {
+    startDate: startDate,
+    endDate: endDate,
+    key: "selection",
+  };
+
+  const handleSelect = (ranges) => {
+    setStartDate(ranges.selection.startDate);
+    setEndDate(ranges.selection.endDate);
+  };
+
+  useEffect(() => {
+    window.onscroll = function () {
+      scrollFunction();
+    };
+
+    function scrollFunction() {
+      const header = document.querySelector("#header");
+      const logo = document.querySelector("#logo");
+      const search = document.querySelector("#search");
+      const searchInputEl = document.querySelector("#searchInput");
+      const hostIcons = document.querySelector("#hostIcons");
+
+      if (
+        (header && document.body.scrollTop > 80) ||
+        document.documentElement.scrollTop > 10
+      ) {
+        header.classList.remove("p-8");
+        header.classList.add("p-5");
+        logo.classList.remove("h-10");
+        logo.classList.add("h-8");
+        search.classList.remove("py-2");
+        searchInputEl.classList.add("placeholder-gray-400");
+        searchInputEl.classList.remove("placeholder-gray-50");
+        hostIcons.classList.add("text-gray-500");
+        hostIcons.classList.remove("text-gray-50");
+        header.classList.remove("bg-transparent");
+        header.classList.add("bg-white");
+        header.classList.add("shadow-md");
+      } else {
+        header.classList.remove("p-5");
+        header.classList.add("p-8");
+        header.classList.add("bg-transparent");
+        header.classList.remove("bg-white");
+        header.classList.remove("shadow-md");
+        logo.classList.add("h-10");
+        logo.classList.remove("h-8");
+        search.classList.add("py-2");
+        hostIcons.classList.remove("text-gray-500");
+        hostIcons.classList.add("text-gray-50");
+        searchInputEl.classList.remove("placeholder-gray-400");
+        searchInputEl.classList.add("placeholder-gray-50");
+      }
+    }
+  }, []);
+
+  return (
+    <Fade>
+      <header
+        id="header"
+        className={`fixed w-full top-0 ${
+          searchInput.length >= 1 ? "bg-white" : "bg-transparent"
+        }   z-50 grid grid-cols-3 p-8 transform  duration-300  px-8 `}
+      >
+        {/* Left */}
+        <div
+          onClick={() => router.push("/")}
+          id="logo"
+          className="relative flex items-center transform duration-300 h-10 cursor-pointer my-auto"
+        >
+          <Image
+            src="https://links.papareact.com/qd3"
+            layout="fill"
+            objectFit="contain"
+            objectPosition="left"
+          />
+        </div>
+        {/* middle search*/}
+        <div
+          id="search"
+          className="flex items-center  rounded-full py-2 md:shadow-md "
+        >
+          <input
+            id="searchInput"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className={`flex-grow pl-5 bg-transparent outline-none text-sm text-gray-600 placeholder-gray-500`}
+            type="text"
+            placeholder={placeholder || "start your search"}
+          />
+          <SearchIcon className="hidden md:inline-flex h-8 bg-red-400 text-white rounded-full p-2 cursor-pointer  md:mx-2" />
+        </div>
+        {/* right */}
+
+        <div
+          id="hostIcons"
+          className={`flex space-x-4 ${
+            searchInput.length >= 1 ? "text-gray-500" : "text-gray-50"
+          }  items-center justify-end  opacity-90 `}
+        >
+          <p className="hidden md:inline cursor-pointer">Become a host</p>
+          <GlobeAltIcon className="h-6 cursor-pointer" />
+          <div className="flex items-center space-x-2 border-2 p-2 rounded-full">
+            <MenuIcon className="h-6" onClick={()=>'/api/auth/logout'} />
+            <UserCircleIcon className="h-6" onClick={()=>router.push('/api/auth/login')} />
+          </div>
+        </div>
+
+        {searchInput && (
+          <div
+            id="#datePicker"
+            className="datePicker flex flex-col justify-center bg-white p-2 mt-2 rounded-b-lg rounded-t-sm shadow-sm col-span-3 lg:w-auto mx-auto"
+          >
+            <DateRangePicker
+              ranges={[selectionRange]}
+              minDate={new Date()}
+              rangeColors={["#FD5B61"]}
+              onChange={handleSelect}
+              className="shadow-md dateRangePicker  "
+              color={"#3d91ff"}
+            />
+
+            <div className="flex items-center   bg-white border-b shadow-sm">
+              <h2 className="text-2xl ml-2 flex-grow font-semibold">
+                Number of Guests
+              </h2>
+
+              <UsersIcon className="h-5" />
+              <input
+                className="w-12 pl-2 text-lg outline-none text-red-400"
+                type="number"
+                value={noOfGuests}
+                onChange={(e) => setNoOfGuests(e.target.value)}
+              />
             </div>
-              <div className="flex justify-end items-center ml-10">
-            <p className="mr-2 text-gray-400 hidden md:inline-block text-[12px] text-sm xl:text-xl -ml-5 font-bold ">Become a host</p>
-            <GlobeAltIcon className="h-8 hidden md:inline-block text-gray-400  mx-2 "/>
-            <div className="bg-white text-gray flex justify-center sm:mr-5 h-12 items-center  rounded-full  p-1">
-                <UserIcon onClick={()=>router.push('/api/auth/login')}  className="bg-gray-400 h-8 lg:h-10  p-1  rounded-xl "/>
-                <MenuAlt1Icon  className="h-8 lg:h-10  p-1"/>
+            <div className="flex bg-white pt-4  shadow-sm rounded-b-lg">
+              <button
+                onClick={resetInput}
+                className="flex-grow rounded-lg bg-white hover:bg-red-400 hover:shadow-md p-2 mr-1 transiton duration-300 hover:text-white  text-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={search}
+                className="flex-grow rounded-lg bg-white text-red-400 hover:shadow-md hover:bg-red-400 p-2 transiton duration-300 hover:text-white "
+              >
+                Search
+              </button>
             </div>
-              </div>
-        </header>
-    )
+          </div>
+        )}
+      </header>
+    </Fade>
+  );
 }
 
 export default Header;
